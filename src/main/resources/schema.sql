@@ -1,9 +1,11 @@
--- 1. Usersテーブル（基本情報）
-CREATE TABLE IF NOT EXISTS comments (
-    id SERIAL PRIMARY KEY,
-    event_id BIGINT,
-    user_name VARCHAR(255),
-    content TEXT,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    confirmed BOOLEAN DEFAULT FALSE
+CREATE TABLE IF NOT EXISTS recruitments(
+    id SERIAL PRIMARY KEY, 
+    user_id BIGINT NOT NULL,          -- 投稿者のID
+    user_name VARCHAR(255),           -- 表示用の投稿者名
+    title VARCHAR(255) NOT NULL,      -- 募集タイトル
+    music_genre VARCHAR(100),         -- ジャンル
+    event_date VARCHAR(100),          -- 日時
+    location VARCHAR(255),            -- 場所
+    comment TEXT                      -- 詳しい説明
 );
+
