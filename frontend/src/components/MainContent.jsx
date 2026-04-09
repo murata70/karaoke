@@ -13,7 +13,7 @@ function MainContent(props) {
   // 募集詳細（募集リスト画面の詳細モード）へ飛ぶ際の共通ハンドラ
   const handleViewDetail = (recruitmentId) => {
     setSelectedRecruitmentId(recruitmentId);
-    setActiveTab('list');
+    setActiveTab('list'); // 既存のコードに従い、詳細表示ができるlistタブへ飛ばします
   };
 
   // タブ名に応じた出し分け（switch文で整理）
@@ -23,7 +23,7 @@ function MainContent(props) {
         <Home 
           {...others} 
           setActiveTab={setActiveTab} 
-          onViewDetail={handleViewDetail} // 【追加】ホームでも詳細移動を可能に
+          onViewDetail={handleViewDetail} 
         />
       );
 
@@ -43,7 +43,12 @@ function MainContent(props) {
       return <MessageLogs {...others} onViewDetail={handleViewDetail} />;
 
     case 'mypage':
-      return <MyPage {...others} />;
+      return (
+        <MyPage 
+          {...others} 
+          onViewDetail={handleViewDetail} // 【修正】マイページからも詳細に飛べるように関数を渡します
+        />
+      );
 
     // サイドバーがどの名前で送ってきてもUserProfileを出す
     case 'registration':
@@ -56,7 +61,7 @@ function MainContent(props) {
         <Home 
           {...others} 
           setActiveTab={setActiveTab} 
-          onViewDetail={handleViewDetail} // 【追加】デフォルト時も対応
+          onViewDetail={handleViewDetail} 
         />
       );
   }

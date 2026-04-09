@@ -13,6 +13,16 @@ function App() {
     applyToRecruitment, addRecruitment, deleteRecruitment, isAdmin 
   } = useUtamyData();
 
+  // ログアウト処理の定義
+  const handleLogout = () => {
+    if (window.confirm("ログアウトしますか？")) {
+      // ユーザー情報をリセットし、ホームに戻る
+      setUser({ name: 'ゲスト', role: 'user' });
+      setActiveTab('home');
+      alert("ログアウトしました");
+    }
+  };
+
   // 奈央さんこだわりの「細身・スリム」なカードスタイル
   const styles = {
     card: {
@@ -35,6 +45,7 @@ function App() {
         }} 
         isSidebarOpen={isSidebarOpen} 
         setSidebarOpen={setSidebarOpen} 
+        onLogout={handleLogout} // ← 【修正】ここでログアウト関数をSidebarに渡します
       />
 
       <main style={{ flex: 1, padding: '40px', overflowY: 'auto' }}>

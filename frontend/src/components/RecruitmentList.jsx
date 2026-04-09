@@ -42,16 +42,24 @@ function RecruitmentList({ user, isAdmin, recruitments, comments, applyToRecruit
 
   const handleApply = () => {
     if (!message.trim()) { alert("メッセージを入力してください"); return; }
-    if (window.confirm(`「${selectedItem.title}」に参加を申し込みますか？`)) {
+    
+    const confirmMsg = isAlreadyJoined 
+      ? "追加のメッセージを送信しますか？" 
+      : `「${selectedItem.title}」に参加を申し込みますか？`;
+
+    if (window.confirm(confirmMsg)) {
       applyToRecruitment(selectedItem, message);
       alert("メッセージを送信しました！");
       setMessage('');
-      setSelectedItem(null);
-      setActiveTab('home');
+      // 参加済みの場合は画面を閉じず、そのままやり取りが見えるように変更
+      if (!isAlreadyJoined) {
+        setSelectedItem(null);
+        setActiveTab('home');
+      }
     }
   };
 
-  // --- 1. 一覧表示画面 ---
+  // --- 1. 一覧表示画面 (変更なし) ---
   if (!selectedItem) {
     return (
       <div style={{ maxWidth: '800px', margin: '0 auto' }}>
@@ -60,7 +68,6 @@ function RecruitmentList({ user, isAdmin, recruitments, comments, applyToRecruit
           <h2 style={{ fontSize: '1.8rem', color: '#3f51b5', margin: 0, fontWeight: '400' }}>募集を探す</h2>
         </div>
         
-        {/* 検索・フィルタ */}
         <div style={{ display: 'flex', gap: '15px', marginBottom: '20px', alignItems: 'center' }}>
           <div style={{ flex: '2', position: 'relative', backgroundColor: '#fff', borderRadius: '8px', border: '1px solid #eee' }}>
             <Search size={16} style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', color: '#888' }} />
@@ -87,32 +94,17 @@ function RecruitmentList({ user, isAdmin, recruitments, comments, applyToRecruit
               return (
                 <div key={item.id} onClick={() => setSelectedItem(item)} style={{ ...styles.card, padding: '12px 20px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', opacity: isFull ? 0.8 : 1 }}>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    {/* ニックネームとタイトルの並び（ホーム画面と統一） */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                      <span style={{ fontWeight: 'bold', fontSize: '14px', color: '#3f51b5', flexShrink: 0 }}>
-                        {item.author}
-                      </span>
-                      <span style={{ 
-                        fontWeight: 'bold', 
-                        fontSize: '16px', 
-                        color: '#333',
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis' 
-                      }}>
-                        {item.title}
-                      </span>
+                      <span style={{ fontWeight: 'bold', fontSize: '14px', color: '#3f51b5', flexShrink: 0 }}>{item.author}</span>
+                      <span style={{ fontWeight: 'bold', fontSize: '16px', color: '#333', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.title}</span>
                     </div>
-                    
                     <div style={{ display: 'flex', gap: '15px', fontSize: '13px', color: '#666' }}>
                       <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><MapPin size={14} /> {item.location}</span>
                       <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Calendar size={14} /> {item.date}</span>
                       <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Users size={14} /> {participants} / {item.capacity}名</span>
                     </div>
                   </div>
-                  <span style={{ padding: '2px 10px', backgroundColor: '#e8eaf6', color: '#3f51b5', borderRadius: '20px', fontSize: '11px', fontWeight: 'bold', flexShrink: 0, marginLeft: '10px' }}>
-                    {item.musicGenre}
-                  </span>
+                  <span style={{ padding: '2px 10px', backgroundColor: '#e8eaf6', color: '#3f51b5', borderRadius: '20px', fontSize: '11px', fontWeight: 'bold', flexShrink: 0, marginLeft: '10px' }}>{item.musicGenre}</span>
                 </div>
               );
           })}
@@ -181,25 +173,48 @@ function RecruitmentList({ user, isAdmin, recruitments, comments, applyToRecruit
           )}
         </div>
 
+        {/* 修正箇所：メッセージ欄とアクションエリア */}
         <div style={{ padding: '20px', borderTop: '1px solid #eee', backgroundColor: '#fafafa' }}>
-          {isAlreadyJoined ? (
-            <div style={{ textAlign: 'center' }}>
-              <p style={{ fontSize: '12px', color: '#4caf50', fontWeight: 'bold', marginBottom: '10px' }}>この募集に参加済みです</p>
-              <button onClick={handleCancelJoin} style={{ width: '100%', padding: '12px', backgroundColor: '#fff', color: '#ff4d4f', border: '1px solid #ff4d4f', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                <XCircle size={18} /> 参加をキャンセルする
-              </button>
+          
+          {/* 参加済みの場合の通知バッジ */}
+          {isAlreadyJoined && (
+            <div style={{ textAlign: 'center', marginBottom: '12px' }}>
+              <span style={{ fontSize: '11px', color: '#4caf50', fontWeight: 'bold', backgroundColor: '#e8f5e9', padding: '2px 10px', borderRadius: '4px' }}>
+                参加確定済み
+              </span>
             </div>
-          ) : (
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <textarea 
-                placeholder={remainingSlots <= 0 ? "満員です" : "メッセージを入力..."} 
-                value={message} 
-                onChange={(e) => setMessage(e.target.value)} 
-                disabled={remainingSlots <= 0}
-                style={{ flex: 1, height: '40px', padding: '10px', borderRadius: '6px', border: '1px solid #ddd', fontSize: '13px', resize: 'none' }}
-              />
-              <button onClick={handleApply} disabled={remainingSlots <= 0} style={{ padding: '0 20px', backgroundColor: remainingSlots <= 0 ? '#ccc' : '#3f51b5', color: 'white', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px' }}>参加</button>
-            </div>
+          )}
+
+          {/* メッセージ入力欄：参加済みでも、満員でなければ表示 */}
+          <div style={{ display: 'flex', gap: '10px', marginBottom: isAlreadyJoined ? '15px' : '0' }}>
+            <textarea 
+              placeholder={(!isAlreadyJoined && remainingSlots <= 0) ? "満員です" : "メッセージを送信..."} 
+              value={message} 
+              onChange={(e) => setMessage(e.target.value)} 
+              disabled={!isAlreadyJoined && remainingSlots <= 0}
+              style={{ flex: 1, height: '40px', padding: '10px', borderRadius: '6px', border: '1px solid #ddd', fontSize: '13px', resize: 'none' }}
+            />
+            <button 
+              onClick={handleApply} 
+              disabled={!isAlreadyJoined && remainingSlots <= 0}
+              style={{ 
+                padding: '0 20px', 
+                backgroundColor: (!isAlreadyJoined && remainingSlots <= 0) ? '#ccc' : '#3f51b5', 
+                color: 'white', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px' 
+              }}
+            >
+              {isAlreadyJoined ? '送信' : '参加'}
+            </button>
+          </div>
+
+          {/* 参加キャンセルのための控えめなボタン */}
+          {isAlreadyJoined && (
+            <button 
+              onClick={handleCancelJoin} 
+              style={{ width: '100%', padding: '5px', background: 'none', border: 'none', color: '#888', fontSize: '11px', cursor: 'pointer', textDecoration: 'underline' }}
+            >
+              参加をキャンセルする場合はこちら
+            </button>
           )}
 
           {(isAdmin || selectedItem.author === user.name) && (
